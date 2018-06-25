@@ -14,7 +14,8 @@ public class GameManager : MonoBehaviour
     {
         int nrMineShafts = mines.Count;
         mines.Add( nrMineShafts + 1, new MineShaft( nrMineShafts ) );
-        Instantiate( mine, newMineButton.position, Quaternion.identity, gamePanel );
+        GameObject newMine = Instantiate( mine, newMineButton.position, Quaternion.identity, gamePanel );
+        newMine.GetComponentInChildren<Button>().onClick.AddListener( DisplayInfo );
         newMineButton.Translate( new Vector2( 0, -newMineButton.rect.height ) );
 
         const int maxMineShafts = 15;
@@ -29,5 +30,10 @@ public class GameManager : MonoBehaviour
         int nrMineShafts = mines.Count;
         Debug.Log( "Nr of Mines:" + nrMineShafts );
         return nrMineShafts;
+    }
+
+    public void DisplayInfo()
+    {
+        Debug.Log( "Display info" );
     }
 }
