@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Mine : MonoBehaviour
+[System.Serializable]
+public class MineShaft
 {
     public int mineId;
     public int lvl;
@@ -14,7 +15,7 @@ public class Mine : MonoBehaviour
     public float goldDeposit;
     public bool hasManager;
 
-    public Mine( int id )
+    public MineShaft( int id )
     {
         mineId = id;
         lvl = 1;

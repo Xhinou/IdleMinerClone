@@ -8,6 +8,7 @@ public class Manager : MonoBehaviour
     //public NameList surnames;
 
     public new string name;
+    enum Effect { MiningSpeed, WalkSpeed, UpgradeCost };
 
     public Manager()
     {
