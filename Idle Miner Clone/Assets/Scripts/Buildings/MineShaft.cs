@@ -25,7 +25,12 @@ public class MineShaft : Building
     public static MineShaft CreateComponent( GameObject target, int id )
     {
         MineShaft mineShaft = target.AddComponent<MineShaft>();
+
         mineShaft.m_MineId = id;
+        mineShaft.m_Lvl = 1;
+        mineShaft.m_GoldDeposit = 0.0f;
+        mineShaft.m_Foreman = null;
+
         return mineShaft;
     }
 

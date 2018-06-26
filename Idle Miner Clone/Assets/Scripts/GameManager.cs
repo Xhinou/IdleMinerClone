@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour
     public RectTransform m_NewMineRect;
     public Text m_MineShaftCostText;
     private SortedList<int, MineShaft> m_MineShafts;
+    public Vector2 v;
 
 	private void Start ()
 	{
@@ -39,6 +40,10 @@ public class GameManager : MonoBehaviour
         Text lvlText = infoButton.transform.GetComponentInChildren<Text>();
         lvlText.text = "Level\n" + 1;
         m_NewMineRect.Translate( new Vector2( 0, -newMine.GetComponent<RectTransform>().rect.height ) );
+        //m_Elevator.m_ElevatorArea.sizeDelta = new Vector2( m_Elevator.m_ElevatorArea.sizeDelta.x, m_Elevator.m_ElevatorArea.sizeDelta.y + m_NewMineRect.sizeDelta.y );
+        v = m_Elevator.m_ElevatorArea.offsetMin;
+        //m_Elevator.m_ElevatorArea.offsetMin = new Vector2( m_Elevator.m_ElevatorArea.offsetMin.x, m_NewMineRect.offsetMin.y );
+        // m_NewMineRect.offsetMin;
 
         const int maxMineShafts = 15;
         if ( mineId >= maxMineShafts )
