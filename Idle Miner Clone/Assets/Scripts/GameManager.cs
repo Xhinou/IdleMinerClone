@@ -2,38 +2,70 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+//using System;
+//using System.IO;
+//using System.Runtime.Serialization.Formatters.Binary;
 
 public class GameManager : MonoBehaviour
 {
-    SortedList<int, MineShaft> mines = new SortedList<int, MineShaft>();
-    public RectTransform gamePanel;
-    public RectTransform newMineButton;
-    public GameObject mine;
+    public float m_PlayerGold;
+    public InfoManager infoManager;
+    public Elevator m_Elevator;
+    public GameObject m_MineShaftPrefab;
+    public RectTransform m_GamePanel;
+    public RectTransform m_NewMineRect;
+    public Text m_MineShaftCostText;
+    private SortedList<int, MineShaft> m_MineShafts;
+
+	private void Start ()
+	{
+        m_MineShafts = new SortedList<int, MineShaft>();
+        m_MineShaftCostText.text = "New Shaft\n" + CiferConverter.ConvertToString( GetMineShaftCost() );
+    }
+	
+	private void Update ()
+	{
+		
+	}
 
     public void AddMineShaft()
     {
-        int nrMineShafts = mines.Count;
-        mines.Add( nrMineShafts + 1, new MineShaft( nrMineShafts ) );
-        GameObject newMine = Instantiate( mine, newMineButton.position, Quaternion.identity, gamePanel );
-        newMine.GetComponentInChildren<Button>().onClick.AddListener( DisplayInfo );
-        newMineButton.Translate( new Vector2( 0, -newMineButton.rect.height ) );
+        int mineId = GetNrMineShafts() + 1;
+
+        GameObject newMine = Instantiate( m_MineShaftPrefab, m_NewMineRect.position, Quaternion.identity, m_GamePanel );
+        m_MineShafts.Add( mineId, MineShaft.CreateComponent( newMine, mineId ) );
+        Button infoButton = newMine.transform.Find("Button_Info").GetComponent<Button>();
+        infoButton.onClick.AddListener( delegate { infoManager.DisplayInfo( m_MineShafts[mineId] ); } );
+        Text lvlText = infoButton.transform.GetComponentInChildren<Text>();
+        lvlText.text = "Level\n" + 1;
+        m_NewMineRect.Translate( new Vector2( 0, -newMine.GetComponent<RectTransform>().rect.height ) );
 
         const int maxMineShafts = 15;
-        if ( nrMineShafts + 1 >= maxMineShafts )
+        if ( mineId >= maxMineShafts )
         {
-            newMineButton.gameObject.SetActive( false );
+            m_NewMineRect.gameObject.SetActive( false );
+        }
+        else
+        {
+            Debug.Log( "Nr of Shafts: " + GetNrMineShafts() );
+            m_MineShaftCostText.text = "New Shaft\n" + CiferConverter.ConvertToString( GetMineShaftCost() );
         }
     }
 
-    private int GetNrMineShafts()
+    public int GetNrMineShafts()
     {
-        int nrMineShafts = mines.Count;
-        Debug.Log( "Nr of Mines:" + nrMineShafts );
-        return nrMineShafts;
+        return m_MineShafts.Count;
     }
 
-    public void DisplayInfo()
+    public MineShaft GetMineShaftByID( int id )
     {
-        Debug.Log( "Display info" );
+        return m_MineShafts[id];
+    }
+
+    private float GetMineShaftCost()
+    {
+        int nrMineShaft = GetNrMineShafts();
+        float multiplier = Mathf.Pow(2, nrMineShaft) * Mathf.Pow( 10.0f, nrMineShaft + 2 );
+        return multiplier;
     }
 }
