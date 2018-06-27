@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class ElevatorManager : MonoBehaviour
 {
     public Elevator elevator;
-    public InfoManager infoManager;
+    public BuildingInfo infoManager;
     public Button button;
 
     private void Start()

@@ -8,6 +8,9 @@ TagManager:
   - deposit
   - infoButton
   - lvlUp
+  - name
+  - value
+  - predict
   layers:
   - Default
   - TransparentFX

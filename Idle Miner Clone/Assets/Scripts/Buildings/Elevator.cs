@@ -25,27 +25,27 @@ public class Elevator : Building
         from.EmptyDeposit();
     }
 
-    public float GetTotalTransportation()
+    public float GetTotalTransportation( int lvl )
     {
         return 0.0f;
     }
 
-    public float GetMaxLoad()
+    public float GetMaxLoad( int lvl )
     {
         return 0.0f;
     }
 
-    public float GetMovementSpeed()
+    public float GetMovementSpeed( int lvl )
     {
         return 0.0f;
     }
 
-    public float GetLoadingSpeed()
+    public float GetLoadingSpeed( int lvl )
     {
         return 0.0f;
     }
 
-    override public float GetUpgradeCost()
+    override public float GetUpgradeCost( int lvl )
     {
         return 0.0f;
     }
