@@ -22,27 +22,70 @@ public class BuildingInfo : MonoBehaviour
     private Building m_TargetBuilding;
     private int m_CurUpgradeAmount = 1;
 
+    public void OnToggleChange( int amount )
+    {
+        if ( !m_TargetBuilding.IsMaxLevel() )
+        {
+            m_CurUpgradeAmount = amount;
+            if ( amount > m_NextLvlSlider.maxValue )
+                amount = (int)m_NextLvlSlider.maxValue;
+            m_NextLvlSlider.value = m_CurLvlSlider.value + amount;
+        }
+        RefreshInfo();
+    }
+
     public void DisplayInfo( Building building )
     {
+        m_InfoPanel.SetActive( true );
         m_TargetBuilding = building;
-        double upgradeCost = m_TargetBuilding.GetUpgradeCost( m_CurUpgradeAmount );
-        if ( m_TargetBuilding.IsMaxLevel() || m_GameManager.m_PlayerCash < upgradeCost )
+        RefreshInfo();
+        //double upgradeCost = m_TargetBuilding.GetUpgradeCost( m_CurUpgradeAmount );
+        //CheckCash();
+        //m_InfoPanel.SetActive( true );
+        //m_HeadText.text = building.GetInfotext();
+        //RefreshDetails( building );
+        //m_CostText.text = CashFormatter.FormatToString( m_TargetBuilding.GetUpgradeCost( m_CurUpgradeAmount ) );
+        //RefreshSliders();
+        //m_GameManager.RefreshUI();
+    }
+    public void Upgrade()
+    {
+        m_TargetBuilding.LevelUp( m_CurUpgradeAmount );
+        m_TargetBuilding.m_InfoButton.transform.GetComponentInChildren<Text>().text = "Level\n" + m_TargetBuilding.Level;
+        m_GameManager.RetrieveCash( m_TargetBuilding.GetUpgradeCost( m_CurUpgradeAmount ) );
+
+        if ( m_TargetBuilding.Level >= m_TargetBuilding.GetLastBoostLevel() )
         {
-            m_UpgradeButton.interactable = false;
+            RefreshSliders();
         }
         else
         {
-            m_UpgradeButton.interactable = true;
+            m_CurLvlSlider.value += m_CurUpgradeAmount;
+            m_NextLvlSlider.value += m_CurUpgradeAmount;
         }
-        m_InfoPanel.SetActive( true );
-        m_HeadText.text = building.GetInfotext();
-        LoadDetails( building );
-        m_CostText.text = CashFormatter.FormatToString( m_TargetBuilding.GetUpgradeCost( m_CurUpgradeAmount ) );
-        RefreshSliders();
-        m_GameManager.RefreshUI();
+        //DisplayInfo( m_TargetBuilding );
+        m_GameManager.E();
     }
 
-    private void LoadDetails( Building building )
+    public void HideInfo()
+    {
+        ClearDetails();
+        m_InfoPanel.SetActive( false );
+    }
+
+    public void RefreshInfo()
+    {
+        if ( m_InfoPanel.activeInHierarchy )
+        {
+            CheckCash();
+            m_HeadText.text = m_TargetBuilding.GetInfotext();
+            m_CostText.text = CashFormatter.FormatToString( m_TargetBuilding.GetUpgradeCost( m_CurUpgradeAmount ) );
+            RefreshDetails( m_TargetBuilding );
+            RefreshSliders();
+        }
+    }
+
+    private void RefreshDetails( Building building )
     {
         if (m_Details.Count > 0 )
         {
@@ -56,39 +99,6 @@ public class BuildingInfo : MonoBehaviour
             RectTransform detailRect = m_Details[i].GetComponent<RectTransform>();
             detailRect.localPosition = new Vector2( detailRect.localPosition.x, detailRect.localPosition.y - detailRect.rect.height * m_Viewport.scaleFactor * i );
         }
-    }
-
-    public void HideInfo()
-    {
-        ClearDetails();
-        m_InfoPanel.SetActive( false );
-    }
-
-    private void ClearDetails()
-    {
-        foreach ( GameObject detail in m_Details )
-        {
-            Destroy( detail );
-        }
-        m_Details.Clear();
-    }
-
-    public void Upgrade()
-    {
-        m_TargetBuilding.LevelUp( m_CurUpgradeAmount );
-        m_TargetBuilding.m_InfoButton.transform.GetComponentInChildren<Text>().text = "Level\n" + m_TargetBuilding.Level;
-        m_GameManager.m_PlayerCash -= m_TargetBuilding.GetUpgradeCost( m_CurUpgradeAmount );
-
-        if ( m_TargetBuilding.Level >= m_TargetBuilding.GetLastBoostLevel() )
-        {
-            RefreshSliders();
-        }
-        else
-        {
-            m_CurLvlSlider.value += m_CurUpgradeAmount;
-            m_NextLvlSlider.value += m_CurUpgradeAmount;
-        }
-        DisplayInfo( m_TargetBuilding );
     }
 
     private void RefreshSliders( int lastBoostLevel = 0 )
@@ -109,15 +119,17 @@ public class BuildingInfo : MonoBehaviour
         }
     }
 
-    public void OnToggleChange( int amount )
+    private void CheckCash()
     {
-        if ( !m_TargetBuilding.IsMaxLevel() )
+        m_UpgradeButton.interactable = ( !m_TargetBuilding.IsMaxLevel() && m_GameManager.PlayerCash >= m_TargetBuilding.GetUpgradeCost( m_CurUpgradeAmount ) );
+    }
+
+    private void ClearDetails()
+    {
+        foreach ( GameObject detail in m_Details )
         {
-            m_CurUpgradeAmount = amount;
-            if ( amount > m_NextLvlSlider.maxValue )
-                amount = (int)m_NextLvlSlider.maxValue;
-            m_NextLvlSlider.value = m_CurLvlSlider.value + amount;
+            Destroy( detail );
         }
-        DisplayInfo( m_TargetBuilding );
+        m_Details.Clear();
     }
 }

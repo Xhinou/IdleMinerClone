@@ -14,6 +14,7 @@ public class Elevator : Building
 
     private void Start()
     {
+        m_MaxLevel = 2000;
         m_InitPos = m_ElevatorButton.transform.position;
         Debug.Log( m_InitPos );
     }
@@ -21,62 +22,55 @@ public class Elevator : Building
     #region States
     public void StartCollecting()
     {
-        StartCoroutine( "Collect" );
-        m_ElevatorButton.interactable = !m_ElevatorButton.interactable;
+        if (m_MineShaftManager.GetNrMineShafts() > 0 )
+        {
+            StartCoroutine( "Collect" );
+            m_ElevatorButton.interactable = !m_ElevatorButton.interactable;
+        }
     }
 
     private IEnumerator Collect()
     {
-        Debug.Log( "in" );
         double loadingSpeed = GetLoadingSpeed();
         double maxLoad = GetMaxLoad();
         int id = 1;
         MineShaft targetMineShaft = m_MineShaftManager.GetMineShaft( id );
         Vector2 initPos = m_ElevatorButton.transform.position;
         SetVerticalPos( targetMineShaft.m_IdText.transform.position.y );
-        Debug.Log( "Currently Loading" );
-        yield return new WaitForSeconds(1.0f);
 
         while ( true )
         {
-            if (m_TransportedGold >= maxLoad )
+            if (m_TransportedCash >= maxLoad )
             {
-                yield return new WaitForSeconds( 1.0f );
-                Debug.Log( "Max Load reached" );
                 ToIdleState( initPos );
                 break;
             }
             else
             {
-                if ( targetMineShaft.GoldDeposit > loadingSpeed )
+                if ( targetMineShaft.CashDeposit > loadingSpeed )
                 {
-                    Debug.Log( "Loading from MineShaft" );
-                    m_TransportedGold += loadingSpeed;
+                    m_TransportedCash += loadingSpeed;
                     targetMineShaft.RetrieveFromDeposit( loadingSpeed );
-                    yield return new WaitForSeconds( 1.0f );
+                    yield return new WaitForSeconds( 1 );
                 }
                 else
                 {
-                    Debug.Log( "MineShaft empty" );
-                    m_TransportedGold += targetMineShaft.GoldDeposit;
+                    m_TransportedCash += targetMineShaft.CashDeposit;
                     targetMineShaft.EmptyDeposit();
+                    yield return new WaitForSeconds( 1 );
                     if ( targetMineShaft = m_MineShaftManager.GetMineShaft( ++id ) )
                     {
-                        yield return new WaitForSeconds( 1.0f );
-                        Debug.Log( "Moving to next MineShaft" );
                         SetVerticalPos( targetMineShaft.m_IdText.transform.position.y );
                         yield return null;
                     }
                     else
                     {
-                        Debug.Log( "No more MineShaft, back to base" );
                         ToIdleState( initPos );
                         break;
                     }
                 }
             }
         }
-        Debug.Log( "Loading ended" );
         yield return null;
     }
 
@@ -88,9 +82,8 @@ public class Elevator : Building
     private void ToIdleState( Vector2 initPos )
     {
         m_ElevatorButton.transform.position = initPos;
-       // Debug.Log( m_ElevatorButton.transform.position );
-        AddToDeposit( m_TransportedGold );
-        m_TransportedGold = 0.0;
+        AddToDeposit( m_TransportedCash );
+        m_TransportedCash = 0.0;
         m_ElevatorButton.interactable = !m_ElevatorButton.interactable;
     }
 
@@ -151,16 +144,8 @@ public class Elevator : Building
         double increase = 0.07;
         return CashFormatter.CompoundInterest( baseSpeed, increase, m_Level + upgradeAmount );
     }
-
-    public override double GetUpgradeCost( int upgradeAmount )
-    {
-        double baseCost = 100.0;
-        double interest = 0.08;
-        int period = m_Level + upgradeAmount;
-        return CashFormatter.CompoundInterest( baseCost, interest, period );
-    }
     #endregion Details
 
-    public double TransportedGold { get { return m_TransportedGold; } }
+    public double TransportedGold { get { return m_TransportedCash; } }
     public bool IsBottom { get { return m_IsBottom; } }
 }

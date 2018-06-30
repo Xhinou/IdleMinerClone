@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class Foreman : MonoBehaviour
 {
-    //private string m_Name;
-    //private bool m_IsActive;
+    private string m_Name;
+    private bool m_IsActive;
 
     //private void Update()
     //{
@@ -17,6 +17,6 @@ public class Foreman : MonoBehaviour
 
     //}
 
-    //public string Name { get { return m_Name; } }
-    //public bool IsActive { get { return m_IsActive; } }
+    public string Name { get { return m_Name; } }
+    public bool IsActive { get { return m_IsActive; } }
 }

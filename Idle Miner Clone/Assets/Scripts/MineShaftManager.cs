@@ -6,7 +6,6 @@ public class MineShaftManager : MonoBehaviour
 {
     private const int m_MaxMineShafts = 17;
     private List<MineShaft> m_MineShafts = new List<MineShaft>();
-    private double m_Basecost = 10.0;
 
     public void AddMineShaft( MineShaft mineShaft )
     {
@@ -22,13 +21,17 @@ public class MineShaftManager : MonoBehaviour
         }
     }
 
-    public double GetCurrentBuyCost()
+    public double GetNewBuyCost()
     {
-        if ( GetNrMineShafts() <= 0 )
+        switch ( GetNrMineShafts() )
         {
-            return m_Basecost;
+            case 0:
+                return 10.0;
+            case 1:
+                return 1000.0;
+            default:
+                return 3000.0 * System.Math.Pow( 20.0, GetNrMineShafts() - 2 );
         }
-        return m_MineShafts[GetNrMineShafts() - 1].GetBuyCost();
     }
 
     public int GetNrMineShafts()
@@ -40,16 +43,8 @@ public class MineShaftManager : MonoBehaviour
     {
         if (id > 0 && id <= GetNrMineShafts() )
             return m_MineShafts[id - 1];
-
-        //Debug.LogWarning( "GetMineShaft(int id) > Incorrect ID: null was returned." );
+        
         return null;
-    }
-
-    public int GetLastMineShaftId()
-    {
-        int id = GetNrMineShafts();
-        if ( id < 1 ) Debug.LogWarning( "GetLastMineShaftId() > m_MineShafts was empty: 0 was returned." );
-        return GetNrMineShafts();
     }
 
     public int MaxMineShafts { get { return m_MaxMineShafts; } }

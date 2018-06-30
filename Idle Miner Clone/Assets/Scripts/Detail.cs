@@ -16,17 +16,17 @@ public class Detail : MonoBehaviour
         SetPredictText( predict );
     }
 
-    public void SetNameText( string name )
+    private void SetNameText( string name )
     {
         m_NameText.text = name;
     }
 
-    public void SetValueText( double value, string extra = "" )
+    private void SetValueText( double value, string extra = "" )
     {
         m_ValueText.text = CashFormatter.FormatToString( value ) + extra;
     }
 
-    public void SetPredictText( double predict )
+    private void SetPredictText( double predict )
     {
         m_PredictText.text = "+" + CashFormatter.FormatToString( predict );
     }

@@ -11,6 +11,11 @@ public class MineShaft : Building
 
     private int m_MineId;
 
+    private void Start()
+    {
+        m_MaxLevel = 800;
+    }
+
     #region States
     public void StartMining()
     {
@@ -25,7 +30,7 @@ public class MineShaft : Building
 
         while ( duration > 0.0 )
         {
-            m_TransportedGold += miningSpeed * Time.deltaTime;
+            m_TransportedCash += miningSpeed * Time.deltaTime;
             duration -= Time.deltaTime;
             yield return null;
         }
@@ -35,7 +40,7 @@ public class MineShaft : Building
 
     private IEnumerator Deposit()
     {
-        double duration = GetWalkingTime( m_Level );
+        double duration = GetWalkingTime();
 
         while ( duration > 0.0 )
         {
@@ -43,9 +48,9 @@ public class MineShaft : Building
             yield return null;
         }
 
-        m_GoldDeposit += m_TransportedGold;
-        m_TransportedGold = 0.0;
-        m_DepositText.text = CashFormatter.FormatToString( m_GoldDeposit );
+        m_CashDeposit += m_TransportedCash;
+        m_TransportedCash = 0.0;
+        m_DepositText.text = CashFormatter.FormatToString( m_CashDeposit );
         m_MinerButton.interactable = !m_MinerButton.interactable;
         yield return null;
     }
@@ -153,15 +158,17 @@ public class MineShaft : Building
         return GetMiningSpeed( upgradeAmount ) * multiplier;
     }
 
-    public double GetNextBuyCost( double baseCost = 500.0 )
+    public double GetNextBuyCost()
     {
-        int idspec = 2;
-        if ( m_MineId <= 0 )
-            return 10.0;
-        else if ( m_MineId <= 1 )
-            return 1000.0;
-        else
-            return 3000.0 * System.Math.Pow( 20.0, m_MineId - idspec );
+        switch ( m_MineId )
+        {
+            case 0:
+                return 10.0;
+            case 1:
+                return 1000.0;
+            default:
+                return 3000.0 * System.Math.Pow( 20.0, m_MineId - 2 );
+        }
     }
 
     public double GetBuyCost()
@@ -177,18 +184,9 @@ public class MineShaft : Building
         }
     }
 
-    public double CalculateBuyCost( double arg, float id )
+    public override double GetUpgradeCost( int upgradeAmount )
     {
-        if ( id >= 0 )
-        {
-            arg = CalculateBuyCost( arg, id - 1 ) * System.Math.Pow( 20.0, 1 / ( 1 + id / 10 ) );
-        }
-        return arg;
-    }
-
-    public override double GetUpgradeCost( int amount )
-    {
-        int period = m_Level + amount - 1;
+        int period = m_Level + upgradeAmount - 1;
         double baseInterest = 0.16;
         double baseInterestDecrease = -0.00086;
         double interest = CashFormatter.CompoundInterest( baseInterest, baseInterestDecrease, period );
@@ -230,14 +228,6 @@ public class MineShaft : Building
                 baseAbs = maxAbs;
         }
         return prevBoostLvl;
-    }
-
-    public void PrintBoostLevels()
-    {
-        int last = GetLastBoostLevel();
-        int next = GetNextBoostLevel();
-        string message = "For level " + m_Level + ": Last=" + last + ", Next=" + next;
-        Debug.Log(message);
     }
     #endregion Details
 

@@ -12,17 +12,24 @@ public abstract class Building : MonoBehaviour
     public Text m_DepositText;
 
     protected int m_Level = 1;
-    protected double m_GoldDeposit = 0.0f;
-    protected double m_TransportedGold = 0.0f;
-    protected const int m_MaxLevel = 800;
+    protected double m_CashDeposit = 0.0;
+    protected double m_TransportedCash = 0.0;
+    protected int m_MaxLevel;
 
-    public abstract double GetUpgradeCost( int lvl );
     public abstract void CreateDetails( List<GameObject> where, GameObject prefab, Transform parent, int upgradeAmount );
     public abstract string GetInfotext();
 
     private void Start()
     {
-        m_DepositText.text = "";
+        m_DepositText.text = "0";
+    }
+
+    public virtual double GetUpgradeCost( int upgradeAmount )
+    {
+        double baseCost = 100.0;
+        double interest = 0.08;
+        int period = m_Level + upgradeAmount;
+        return CashFormatter.CompoundInterest( baseCost, interest, period );
     }
 
     public virtual int GetNextBoostLevel()
@@ -55,19 +62,19 @@ public abstract class Building : MonoBehaviour
 
     public void AddToDeposit( double amount )
     {
-        m_GoldDeposit += amount;
-        m_DepositText.text = CashFormatter.FormatToString( m_GoldDeposit );
+        m_CashDeposit += amount;
+        m_DepositText.text = CashFormatter.FormatToString( m_CashDeposit );
     }
 
     public void RetrieveFromDeposit( double amount )
     {
-        m_GoldDeposit -= amount;
-        m_DepositText.text = CashFormatter.FormatToString( m_GoldDeposit );
+        m_CashDeposit -= amount;
+        m_DepositText.text = CashFormatter.FormatToString( m_CashDeposit );
     }
 
     public void EmptyDeposit()
     {
-        m_GoldDeposit = 0.0;
+        m_CashDeposit = 0.0;
         m_DepositText.text = "0";
     }
 
@@ -88,7 +95,7 @@ public abstract class Building : MonoBehaviour
     }
 
     public int Level { get { return m_Level; } }
-    public double GoldDeposit { get { return m_GoldDeposit; } }
+    public double CashDeposit { get { return m_CashDeposit; } }
     public bool HasForeman { get { return m_Foreman != null; } }
     public int MaxLevel { get { return m_MaxLevel; } }
 }
