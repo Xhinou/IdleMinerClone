@@ -8,20 +8,26 @@ public class Detail : MonoBehaviour
     public Text m_NameText;
     public Text m_ValueText;
     public Text m_PredictText;
-    public delegate float GetCurValue( int lvl );
-    public delegate float GetPredictValue( int predict );
-    public GetCurValue CurValueHandler;
-    public GetPredictValue PredictValueHandler;
-    public float m_CurValue;
-    public float m_PredictValue;
 
-    //public void SetCurValue( int lvl )
-    //{
-    //    CurValueHandler( lvl );
-    //}
+    public void SetDetailTexts( string name, double value, double predict, string extra = "" )
+    {
+        SetNameText( name );
+        SetValueText( value, extra );
+        SetPredictText( predict );
+    }
 
-    //public void SetPredictValue( int predict )
-    //{
-    //    PredictValueHandler( predict );
-    //}
+    public void SetNameText( string name )
+    {
+        m_NameText.text = name;
+    }
+
+    public void SetValueText( double value, string extra = "" )
+    {
+        m_ValueText.text = CashFormatter.FormatToString( value ) + extra;
+    }
+
+    public void SetPredictText( double predict )
+    {
+        m_PredictText.text = "+" + CashFormatter.FormatToString( predict );
+    }
 }

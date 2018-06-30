@@ -4,12 +4,22 @@ using UnityEngine;
 
 public class CashFormatter : MonoBehaviour
 {
-    public static string FormatToString( float value )
+    public static double GetCost( double baseCost, double rate, double exp, double denom )
+    {
+        return baseCost * System.Math.Pow( rate, exp / denom );
+    }
+
+    public static double CompoundInterest( double baseAmount, double increase, int period )
+    {
+        return baseAmount * System.Math.Pow( 1 + increase, period );
+    }
+
+    public static string FormatToString( double value )
     {
 
         int scale = 0;
-        float f = value;
-        float floor = 1000.0f;
+        double f = value;
+        double floor = 1000.0f;
         while ( f >= floor )
         {
             f /= floor;

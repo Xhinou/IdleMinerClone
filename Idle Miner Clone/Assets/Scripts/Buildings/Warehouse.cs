@@ -4,9 +4,37 @@ using UnityEngine;
 
 public class Warehouse : Building
 {
-    public float GetTotalTransportation( int lvl )
+    public override void CreateDetails( List<GameObject> where, GameObject prefab, Transform parent, int upgradeAmount )
     {
-        return 0.0f;
+        GameObject newDetail = Instantiate( prefab, parent );
+        newDetail.GetComponent<Detail>().SetDetailTexts( "Total Transportation", GetTotalTransportation( m_Level ), GetTotalTransportation( m_Level + upgradeAmount ) - GetTotalTransportation( m_Level ), "/s" );
+        where.Add( newDetail );
+
+        newDetail = Instantiate( prefab, parent );
+        newDetail.GetComponent<Detail>().SetDetailTexts( "Transporters", GetNrTransporters( m_Level ), GetNrTransporters( m_Level + upgradeAmount ) - GetNrTransporters( m_Level ) );
+        where.Add( newDetail );
+
+        newDetail = Instantiate( prefab, parent );
+        newDetail.GetComponent<Detail>().SetDetailTexts( "Load per Transporter", GetLoadPerTransporter( m_Level ), GetLoadPerTransporter( m_Level + upgradeAmount ) - GetLoadPerTransporter( m_Level ) );
+        where.Add( newDetail );
+
+        newDetail = Instantiate( prefab, parent );
+        newDetail.GetComponent<Detail>().SetDetailTexts( "Loading Speed", GetLoadingSpeed( m_Level ), GetLoadingSpeed( m_Level + upgradeAmount ) - GetLoadingSpeed( m_Level ), "/s" );
+        where.Add( newDetail );
+
+        newDetail = Instantiate( prefab, parent );
+        newDetail.GetComponent<Detail>().SetDetailTexts( "Walking Speed", GetWalkingSpeed( m_Level ), GetWalkingSpeed( m_Level + upgradeAmount ) - GetWalkingSpeed( m_Level ), "/s" );
+        where.Add( newDetail );
+    }
+
+    public override string GetInfotext()
+    {
+        return "Warehouse Level " + m_Level;
+    }
+
+    public double GetTotalTransportation( int lvl )
+    {
+        return 0.0;
     }
 
     public int GetNrTransporters( int lvl )
@@ -14,23 +42,23 @@ public class Warehouse : Building
         return 0;
     }
 
-    public float GetLoadPerTransporter( int lvl )
+    public double GetLoadPerTransporter( int lvl )
     {
-        return 0.0f;
+        return 0.0;
     }
 
-    public float GetLoadingspeed( int lvl )
+    public double GetLoadingSpeed( int lvl )
     {
-        return 0.0f;
+        return 0.0;
     }
 
-    public float GetWalkingSpeed( int lvl )
+    public double GetWalkingSpeed( int lvl )
     {
-        return 0.0f;
+        return 0.0;
     }
 
-    public override float GetUpgradeCost( int lvl )
+    public override double GetUpgradeCost( int lvl )
     {
-        return 0.0f;
+        return 0.0;
     }
 }

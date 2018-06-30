@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public float m_PlayerCash;
+    public double m_PlayerCash;
     public Text m_CashText;
     public Text m_IdleCashText;
     public BuildingInfo infoBuilding;
@@ -14,91 +14,74 @@ public class GameManager : MonoBehaviour
     public Canvas m_Viewport;
     public RectTransform m_GamePanel;
     public RectTransform m_NewMineRect;
-    public Text m_MineShaftCostText;
-    private SortedList<int, MineShaft> m_MineShafts;
+    private Text m_MineShaftCostText;
+    public MineShaftManager m_MineShaftManager;
 
 	private void Start ()
 	{
-        float playerInitCash = 100.0f;
-        m_PlayerCash = playerInitCash;
-        m_MineShafts = new SortedList<int, MineShaft>();
+        //float playerInitCash = 100.0f;
+        //m_PlayerCash = playerInitCash;
         m_CashText.text = CashFormatter.FormatToString( m_PlayerCash );
-        m_MineShaftCostText.text = "New Shaft\n" + CashFormatter.FormatToString( GetMineShaftCost() );
+        m_MineShaftCostText = m_NewMineRect.GetComponentInChildren<Text>();
+        m_MineShaftCostText.text = "New Shaft\nCost: " + CashFormatter.FormatToString( m_MineShaftManager.GetCurrentBuyCost() );
     }
-    private string big = "aa";
+
 	private void Update ()
 	{
 		if ( Input.GetKeyDown( KeyCode.C ) == true )
         {
-            m_PlayerCash *= 2;
-            m_CashText.text = CashFormatter.FormatToString( m_PlayerCash );
-        }
-        if ( Input.GetKeyDown( KeyCode.T ) == true )
-        {
-            Debug.Log( big );
-            char nextLetter = (char)(big[big.Length - 1] + 1);
-            big = big.Remove( big.Length - 1 );
-            if ( !System.Char.IsLetter( nextLetter ) )
+            m_PlayerCash *= 2.0;
+            if ( m_PlayerCash > m_MineShaftManager.GetCurrentBuyCost() && m_NewMineRect != null )
             {
-                char firstLetter = (char)( big[big.Length - 1] + 1 );
-                nextLetter = 'a';
-                big = "";
-                big += firstLetter;
-                big += nextLetter;
+                m_NewMineRect.GetComponent<Button>().interactable = true;
             }
-            else
-            {
-                big += nextLetter;
-            }
+            RefreshUI();
         }
     }
 
-    public void AddMineShaft()
+    public void CreateMineShaft()
     {
-        int mineId = GetNrMineShafts() + 1;
+        m_PlayerCash -= m_MineShaftManager.GetCurrentBuyCost();
 
-        GameObject newMine = Instantiate( m_MineShaftPrefab, m_NewMineRect.position, Quaternion.identity, m_GamePanel );
-        m_MineShafts.Add( mineId, MineShaft.CreateComponent( newMine, mineId ) );
-        Button infoButton = GameObjectFinder.GetChildWithTag(newMine.transform, "infoButton" ).GetComponent<Button>();
-        infoButton.onClick.AddListener( delegate { infoBuilding.DisplayInfo( m_MineShafts[mineId] ); } );
+        GameObject newObject = Instantiate( m_MineShaftPrefab, m_NewMineRect.position, Quaternion.identity, m_GamePanel );
+        MineShaft mineShaft = newObject.GetComponent<MineShaft>();
+        m_MineShaftManager.AddMineShaft( mineShaft );
+
+        Button infoButton = mineShaft.m_InfoButton;
+        infoButton.onClick.AddListener( delegate { infoBuilding.DisplayInfo( mineShaft ); } );
         Text lvlText = infoButton.transform.GetComponentInChildren<Text>();
         lvlText.text = "Level\n" + 1;
-        float yOffset = newMine.GetComponent<RectTransform>().rect.height;
+
+        float yOffset = mineShaft.GetComponent<RectTransform>().rect.height;
         m_NewMineRect.transform.Translate( new Vector2( 0, -yOffset * m_Viewport.scaleFactor ) );
         RectTransform elevatorRect = m_Elevator.m_ElevatorArea.GetComponent<RectTransform>();
-        Debug.Log( elevatorRect.offsetMin.y );
         elevatorRect.offsetMin = new Vector2( elevatorRect.offsetMin.x, elevatorRect.offsetMin.y - yOffset );
-
-        const int maxMineShafts = 17;
-        if ( mineId >= maxMineShafts )
+        
+        if ( m_MineShaftManager.GetNrMineShafts() >= m_MineShaftManager.MaxMineShafts )
         {
-            m_NewMineRect.gameObject.SetActive( false );
+            Destroy( m_NewMineRect.gameObject );
+            m_NewMineRect = null;
         }
         else
         {
-            m_MineShaftCostText.text = "New Shaft\n" + CashFormatter.FormatToString( GetMineShaftCost() );
-            if (m_PlayerCash < GetMineShaftCost() )
+            double newBuyCost = m_MineShaftManager.GetCurrentBuyCost();
+            m_MineShaftCostText.text = "New Shaft\n" + CashFormatter.FormatToString( newBuyCost );
+            if ( m_PlayerCash < newBuyCost && m_NewMineRect != null )
             {
                 m_NewMineRect.GetComponent<Button>().interactable = false;
             }
         }
+        RefreshUI();
     }
 
-    public int GetNrMineShafts()
+    public void RefreshUI()
     {
-        return m_MineShafts.Count;
-    }
-
-    public MineShaft GetMineShaftByID( int id )
-    {
-        return m_MineShafts[id];
-    }
-
-    private float GetMineShaftCost()
-    {
-        int nrMineShaft = GetNrMineShafts();
-        int powBase = 2;
-
-        return Mathf.Pow( powBase, nrMineShaft) * Mathf.Pow( 10.0f, nrMineShaft + powBase );
+        double newBuyCost = m_MineShaftManager.GetCurrentBuyCost();
+        m_MineShaftCostText.text = "New Shaft\n" + CashFormatter.FormatToString( newBuyCost );
+        if ( m_PlayerCash < newBuyCost && m_NewMineRect != null )
+        {
+            m_NewMineRect.GetComponent<Button>().interactable = false;
+        }
+        m_CashText.text = CashFormatter.FormatToString( m_PlayerCash );
     }
 }
