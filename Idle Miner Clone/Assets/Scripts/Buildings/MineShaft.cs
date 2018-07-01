@@ -25,8 +25,8 @@ public class MineShaft : Building
 
     private IEnumerator Mine()
     {
-        double miningSpeed = GetMiningSpeed();
-        double duration = GetMinerCapacity() / miningSpeed;
+        double miningSpeed = GetCollectingSpeed();
+        double duration = GetMaxLoad() / miningSpeed;
 
         while ( duration > 0.0 )
         {
@@ -50,7 +50,7 @@ public class MineShaft : Building
 
         m_CashDeposit += m_TransportedCash;
         m_TransportedCash = 0.0;
-        m_DepositText.text = CashFormatter.FormatToString( m_CashDeposit );
+        m_DepositText.text = CashUtility.FormatToString( m_CashDeposit );
         m_MinerButton.interactable = !m_MinerButton.interactable;
         yield return null;
     }
@@ -60,23 +60,23 @@ public class MineShaft : Building
     public override void CreateDetails( List<GameObject> where, GameObject prefab, Transform parent, int upgradeAmount )
     {
         GameObject newDetail = Instantiate( prefab, parent );
-        newDetail.GetComponent<Detail>().SetDetailTexts( "Total Extraction", GetTotalExtraction(), GetTotalExtraction(  upgradeAmount ) - GetTotalExtraction(), "/s" );
+        newDetail.GetComponent<Detail>().SetDetailTexts( "Total Extraction", GetTotalCollecting(), GetTotalCollecting(  upgradeAmount ) - GetTotalCollecting(), "/s" );
         where.Add( newDetail );
 
         newDetail = Instantiate( prefab, parent );
-        newDetail.GetComponent<Detail>().SetDetailTexts( "Miners", GetNrMiners(), GetNrMiners( upgradeAmount ) - GetNrMiners() );
+        newDetail.GetComponent<Detail>().SetDetailTexts( "Miners", GetNrWorkers(), GetNrWorkers( upgradeAmount ) - GetNrWorkers() );
         where.Add( newDetail );
 
         newDetail = Instantiate( prefab, parent );
-        newDetail.GetComponent<Detail>().SetDetailTexts( "Walking Speed", GetWalkingSpeed(), GetWalkingSpeed(  upgradeAmount ) - GetWalkingSpeed() );
+        newDetail.GetComponent<Detail>().SetDetailTexts( "Walking Speed", GetMovementSpeed(), GetMovementSpeed(  upgradeAmount ) - GetMovementSpeed() );
         where.Add( newDetail );
 
         newDetail = Instantiate( prefab, parent );
-        newDetail.GetComponent<Detail>().SetDetailTexts( "Mining Speed", GetMiningSpeed(), GetMiningSpeed(  upgradeAmount ) - GetMiningSpeed(), "/s" );
+        newDetail.GetComponent<Detail>().SetDetailTexts( "Mining Speed", GetCollectingSpeed(), GetCollectingSpeed(  upgradeAmount ) - GetCollectingSpeed(), "/s" );
         where.Add( newDetail );
 
         newDetail = Instantiate( prefab, parent );
-        newDetail.GetComponent<Detail>().SetDetailTexts( "Worker Capacity", GetMinerCapacity(), GetMinerCapacity(  upgradeAmount ) - GetMinerCapacity() );
+        newDetail.GetComponent<Detail>().SetDetailTexts( "Worker Capacity", GetMaxLoad(), GetMaxLoad(  upgradeAmount ) - GetMaxLoad() );
         where.Add( newDetail );
     }
 
@@ -85,18 +85,18 @@ public class MineShaft : Building
         return "Mine Shaft " + m_MineId + " Level " + m_Level;
     }
 
-    public double GetTotalExtraction( int upgradeAmount = 0 )
+    public override double GetTotalCollecting( int upgradeAmount = 0 )
     {
-        int nrMiners = GetNrMiners( upgradeAmount );
+        int nrMiners = GetNrWorkers( upgradeAmount );
         double walkTime = GetWalkingTime( upgradeAmount );
-        double mineSpeed = GetMiningSpeed( upgradeAmount );
-        double capacity = GetMinerCapacity( upgradeAmount );
+        double mineSpeed = GetCollectingSpeed( upgradeAmount );
+        double capacity = GetMaxLoad( upgradeAmount );
 
         double formula = nrMiners * ( capacity / ( walkTime +  capacity / mineSpeed ) );
         return formula;
     }
 
-    public int GetNrMiners( int upgradeAmount = 0 )
+    public int GetNrWorkers( int upgradeAmount = 0 )
     {
         int predictNr = 1;
         int lvlLimit = 10;
@@ -113,7 +113,7 @@ public class MineShaft : Building
         return predictNr;
     }
 
-    public double GetWalkingSpeed( int upgradeAmount = 0 )
+    public override double GetMovementSpeed( int upgradeAmount = 0 )
     {
         double predictSpeed = 2.0;
         int lvlLimit = 82;
@@ -141,21 +141,15 @@ public class MineShaft : Building
     public double GetWalkingTime( int upgradeAmount = 0 )
     {
         double timeBase = 4.0;
-        return timeBase / GetWalkingSpeed( upgradeAmount );
+        return timeBase / GetMovementSpeed( upgradeAmount );
     }
 
-    public double GetMiningSpeed( int upgradeAmount = 0 )
+    public override double GetCollectingSpeed( int upgradeAmount = 0 )
     {
         int exp = 2;
         double multiplier = 50.0;
 
         return System.Math.Pow( m_Level + upgradeAmount, exp ) * System.Math.Pow( multiplier, m_MineId );
-    }
-
-    public double GetMinerCapacity( int upgradeAmount = 0 )
-    {
-        double multiplier = 4.0;
-        return GetMiningSpeed( upgradeAmount ) * multiplier;
     }
 
     public double GetNextBuyCost()
@@ -189,9 +183,9 @@ public class MineShaft : Building
         int period = m_Level + upgradeAmount - 1;
         double baseInterest = 0.16;
         double baseInterestDecrease = -0.00086;
-        double interest = CashFormatter.CompoundInterest( baseInterest, baseInterestDecrease, period );
+        double interest = CashUtility.CompoundInterest( baseInterest, baseInterestDecrease, period );
 
-        return CashFormatter.CompoundInterest( GetBuyCost(), interest, period );
+        return CashUtility.CompoundInterest( GetBuyCost(), interest, period );
     }
 
     public override int GetNextBoostLevel()

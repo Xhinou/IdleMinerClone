@@ -41,9 +41,9 @@ public class MineShaftManager : MonoBehaviour
 
     public MineShaft GetMineShaft( int id )
     {
-        if (id > 0 && id <= GetNrMineShafts() )
+        if ( id > 0 && id <= GetNrMineShafts() )
             return m_MineShafts[id - 1];
-        
+
         return null;
     }
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class BuildingInfo : MonoBehaviour
+public class BuildingInfoController : MonoBehaviour
 {
     public GameManager m_GameManager;
     public MineShaftManager m_MineShaftManager;
@@ -15,7 +15,6 @@ public class BuildingInfo : MonoBehaviour
     public Text m_CostText;
     public Slider m_CurLvlSlider;
     public Slider m_NextLvlSlider;
-    public ToggleGroup m_MultToggle;
     public Button m_UpgradeButton;
 
     private List<GameObject> m_Details = new List<GameObject>();
@@ -39,15 +38,8 @@ public class BuildingInfo : MonoBehaviour
         m_InfoPanel.SetActive( true );
         m_TargetBuilding = building;
         RefreshInfo();
-        //double upgradeCost = m_TargetBuilding.GetUpgradeCost( m_CurUpgradeAmount );
-        //CheckCash();
-        //m_InfoPanel.SetActive( true );
-        //m_HeadText.text = building.GetInfotext();
-        //RefreshDetails( building );
-        //m_CostText.text = CashFormatter.FormatToString( m_TargetBuilding.GetUpgradeCost( m_CurUpgradeAmount ) );
-        //RefreshSliders();
-        //m_GameManager.RefreshUI();
     }
+
     public void Upgrade()
     {
         m_TargetBuilding.LevelUp( m_CurUpgradeAmount );
@@ -63,8 +55,7 @@ public class BuildingInfo : MonoBehaviour
             m_CurLvlSlider.value += m_CurUpgradeAmount;
             m_NextLvlSlider.value += m_CurUpgradeAmount;
         }
-        //DisplayInfo( m_TargetBuilding );
-        m_GameManager.E();
+        m_GameManager.RefreshUI();
     }
 
     public void HideInfo()
@@ -79,7 +70,7 @@ public class BuildingInfo : MonoBehaviour
         {
             CheckCash();
             m_HeadText.text = m_TargetBuilding.GetInfotext();
-            m_CostText.text = CashFormatter.FormatToString( m_TargetBuilding.GetUpgradeCost( m_CurUpgradeAmount ) );
+            m_CostText.text = CashUtility.FormatToString( m_TargetBuilding.GetUpgradeCost( m_CurUpgradeAmount ) );
             RefreshDetails( m_TargetBuilding );
             RefreshSliders();
         }

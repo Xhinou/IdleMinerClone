@@ -8,7 +8,6 @@ public class Warehouse : Building
     public GameManager m_GameManager;
     public Elevator m_Elevator;
     public Button m_WarehouseButton;
-    //public new Text m_DepositText = 0;
 
     private void Start()
     {
@@ -24,8 +23,8 @@ public class Warehouse : Building
     #region States
     private IEnumerator Collect()
     {
-        double maxLoad = GetLoadPerTransporter();
-        double loadSpeed = GetLoadingSpeed();
+        double maxLoad = GetMaxLoad();
+        double loadSpeed = GetCollectingSpeed();
 
         while ( m_TransportedCash < maxLoad )
         {
@@ -67,23 +66,23 @@ public class Warehouse : Building
     public override void CreateDetails( List<GameObject> where, GameObject prefab, Transform parent, int upgradeAmount )
     {
         GameObject newDetail = Instantiate( prefab, parent );
-        newDetail.GetComponent<Detail>().SetDetailTexts( "Total Transportation", GetTotalTransportation(), GetTotalTransportation(  upgradeAmount ) - GetTotalTransportation(), "/s" );
+        newDetail.GetComponent<Detail>().SetDetailTexts( "Total Transportation", GetTotalCollecting(), GetTotalCollecting(  upgradeAmount ) - GetTotalCollecting(), "/s" );
         where.Add( newDetail );
 
         newDetail = Instantiate( prefab, parent );
-        newDetail.GetComponent<Detail>().SetDetailTexts( "Transporters", GetNrTransporters(), GetNrTransporters( upgradeAmount ) - GetNrTransporters() );
+        newDetail.GetComponent<Detail>().SetDetailTexts( "Transporters", GetNrWorkers(), GetNrWorkers( upgradeAmount ) - GetNrWorkers() );
         where.Add( newDetail );
 
         newDetail = Instantiate( prefab, parent );
-        newDetail.GetComponent<Detail>().SetDetailTexts( "Load per Transporter", GetLoadPerTransporter(), GetLoadPerTransporter( upgradeAmount ) - GetLoadPerTransporter() );
+        newDetail.GetComponent<Detail>().SetDetailTexts( "Load per Transporter", GetMaxLoad(), GetMaxLoad( upgradeAmount ) - GetMaxLoad() );
         where.Add( newDetail );
 
         newDetail = Instantiate( prefab, parent );
-        newDetail.GetComponent<Detail>().SetDetailTexts( "Loading Speed", GetLoadingSpeed(), GetLoadingSpeed( upgradeAmount ) - GetLoadingSpeed(), "/s" );
+        newDetail.GetComponent<Detail>().SetDetailTexts( "Loading Speed", GetCollectingSpeed(), GetCollectingSpeed( upgradeAmount ) - GetCollectingSpeed(), "/s" );
         where.Add( newDetail );
 
         newDetail = Instantiate( prefab, parent );
-        newDetail.GetComponent<Detail>().SetDetailTexts( "Walking Speed", GetWalkingSpeed(), GetWalkingSpeed( upgradeAmount ) - GetWalkingSpeed(), "/s" );
+        newDetail.GetComponent<Detail>().SetDetailTexts( "Walking Speed", GetMovementSpeed(), GetMovementSpeed( upgradeAmount ) - GetMovementSpeed() );
         where.Add( newDetail );
     }
 
@@ -92,18 +91,18 @@ public class Warehouse : Building
         return "Warehouse Level " + m_Level;
     }
 
-    public double GetTotalTransportation( int upgradeAmount = 0 )
+    public override double GetTotalCollecting( int upgradeAmount = 0 )
     {
-        int nrTransporters = GetNrTransporters( upgradeAmount );
+        int nrTransporters = GetNrWorkers( upgradeAmount );
         double walkTime = GetWalkingTime( upgradeAmount );
-        double loadSpeed = GetLoadingSpeed( upgradeAmount );
-        double capacity = GetLoadPerTransporter( upgradeAmount );
+        double loadSpeed = GetCollectingSpeed( upgradeAmount );
+        double capacity = GetMaxLoad( upgradeAmount );
 
         double formula = nrTransporters * ( capacity / ( walkTime + capacity / loadSpeed ) );
         return formula;
     }
 
-    public int GetNrTransporters( int upgradeAmount = 0 )
+    public int GetNrWorkers( int upgradeAmount = 0 )
     {
         int predictNr = 1;
         int lvlLimit = 100;
@@ -117,20 +116,14 @@ public class Warehouse : Building
         return predictNr;
     }
 
-    public double GetLoadPerTransporter( int upgradeAmount = 0 )
+    public override double GetCollectingSpeed( int upgradeAmount = 0 )
     {
-        double multiplier = 4.0;
-        return GetLoadingSpeed( upgradeAmount ) * multiplier;
-    }
-
-    public double GetLoadingSpeed( int upgradeAmount = 0 )
-    {
-        double baseSpeed = 10.0;
+        double baseSpeed = 50.0;
         double interest = 0.16;
-        return CashFormatter.CompoundInterest( baseSpeed, interest, m_Level + upgradeAmount );
+        return CashUtility.CompoundInterest( baseSpeed, interest, m_Level + upgradeAmount );
     }
 
-    public double GetWalkingSpeed( int upgradeAmount = 0 )
+    public override double GetMovementSpeed( int upgradeAmount = 0 )
     {
         double predictSpeed = 2.0;
         int lvlLimit = 400;
@@ -147,7 +140,7 @@ public class Warehouse : Building
     public double GetWalkingTime( int upgradeAmount = 0 )
     {
         double timeBase = 4.0;
-        return timeBase / GetWalkingSpeed( upgradeAmount );
+        return timeBase / GetMovementSpeed( upgradeAmount );
     }
     #endregion Details
 }

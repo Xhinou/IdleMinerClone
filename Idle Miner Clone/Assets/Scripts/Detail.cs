@@ -23,11 +23,11 @@ public class Detail : MonoBehaviour
 
     private void SetValueText( double value, string extra = "" )
     {
-        m_ValueText.text = CashFormatter.FormatToString( value ) + extra;
+        m_ValueText.text = CashUtility.FormatToString( value ) + extra;
     }
 
     private void SetPredictText( double predict )
     {
-        m_PredictText.text = "+" + CashFormatter.FormatToString( predict );
+        m_PredictText.text = "+" + CashUtility.FormatToString( predict );
     }
 }

@@ -8,8 +8,7 @@ public class Elevator : Building
     public MineShaftManager m_MineShaftManager;
     public RectTransform m_ElevatorArea;
     public Button m_ElevatorButton;
-
-    private bool m_IsBottom = false;
+    
     private Vector3 m_InitPos;
 
     private void Start()
@@ -31,7 +30,7 @@ public class Elevator : Building
 
     private IEnumerator Collect()
     {
-        double loadingSpeed = GetLoadingSpeed();
+        double loadingSpeed = GetCollectingSpeed();
         double maxLoad = GetMaxLoad();
         int id = 1;
         MineShaft targetMineShaft = m_MineShaftManager.GetMineShaft( id );
@@ -93,7 +92,7 @@ public class Elevator : Building
     public override void CreateDetails( List<GameObject> where, GameObject prefab, Transform parent, int upgradeAmount )
     {
         GameObject newDetail = Instantiate( prefab, parent );
-        newDetail.GetComponent<Detail>().SetDetailTexts( "Total Transportation", GetTotalTransportation(), GetTotalTransportation( upgradeAmount ) - GetTotalTransportation(), "/s" );
+        newDetail.GetComponent<Detail>().SetDetailTexts( "Total Transportation", GetTotalCollecting(), GetTotalCollecting( upgradeAmount ) - GetTotalCollecting(), "/s" );
         where.Add( newDetail );
 
         newDetail = Instantiate( prefab, parent );
@@ -105,7 +104,7 @@ public class Elevator : Building
         where.Add( newDetail );
 
         newDetail = Instantiate( prefab, parent );
-        newDetail.GetComponent<Detail>().SetDetailTexts( "Loading Speed", GetLoadingSpeed(), GetLoadingSpeed( upgradeAmount ) - GetLoadingSpeed(), "/s" );
+        newDetail.GetComponent<Detail>().SetDetailTexts( "Loading Speed", GetCollectingSpeed(), GetCollectingSpeed( upgradeAmount ) - GetCollectingSpeed(), "/s" );
         where.Add( newDetail );
     }
 
@@ -114,9 +113,9 @@ public class Elevator : Building
         return "Elevator Level " + m_Level;
     }
 
-    public double GetTotalTransportation( int upgradeAmount = 0 )
+    public override double GetTotalCollecting( int upgradeAmount = 0 )
     {
-        double loadSpeed = GetLoadingSpeed( upgradeAmount );
+        double loadSpeed = GetCollectingSpeed( upgradeAmount );
         double moveSpeed = GetMovementSpeed( upgradeAmount );
         double maxLoad = GetMaxLoad( upgradeAmount );
 
@@ -124,13 +123,7 @@ public class Elevator : Building
         return formula;
     }
 
-    public double GetMaxLoad( int upgradeAmount = 0 )
-    {
-        double multiplier = 4.0;
-        return GetLoadingSpeed( upgradeAmount ) * multiplier;
-    }
-
-    public double GetMovementSpeed( int upgradeAmount = 0 )
+    public override double GetMovementSpeed( int upgradeAmount = 0 )
     {
         double baseSpeed = 1.0;
         double increase = 0.01;
@@ -138,14 +131,13 @@ public class Elevator : Building
         return baseSpeed + 3.0 * ( ( m_Level + upgradeAmount ) / 5.0 ) * increase;
     }
 
-    public double GetLoadingSpeed( int upgradeAmount = 0 )
+    public override double GetCollectingSpeed( int upgradeAmount = 0 )
     {
-        double baseSpeed = 10.0;
-        double increase = 0.07;
-        return CashFormatter.CompoundInterest( baseSpeed, increase, m_Level + upgradeAmount );
+        double baseSpeed = 50.0;
+        double increase = 0.16;
+        return CashUtility.CompoundInterest( baseSpeed, increase, m_Level + upgradeAmount );
     }
     #endregion Details
 
     public double TransportedGold { get { return m_TransportedCash; } }
-    public bool IsBottom { get { return m_IsBottom; } }
 }

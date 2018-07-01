@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
     public MineShaftManager m_MineShaftManager;
-    public BuildingInfo m_BuildingInfoManager;
+    public BuildingInfoController m_BuildingInfoController;
     public Elevator m_Elevator;
     public Text m_CashText;
     public Text m_IdleCashText;
@@ -23,34 +23,19 @@ public class GameManager : MonoBehaviour
         double playerInitCash = 100.0;
         m_PlayerCash = playerInitCash;
         m_MineShaftCostText = m_NewMineRect.GetComponentInChildren<Text>();
-        //m_CashText.text = CashFormatter.FormatToString( m_PlayerCash );
-        //m_MineShaftCostText.text = "New Shaft\nCost: " + CashFormatter.FormatToString( m_MineShaftManager.GetCurrentBuyCost() );
-        E();
-    }
-
-	private void Update ()
-	{
-		if ( Input.GetKeyDown( KeyCode.C ) == true )
-        {
-            m_PlayerCash *= 2.0;
-            if ( m_PlayerCash > m_MineShaftManager.GetNewBuyCost() && m_NewMineRect != null )
-            {
-                m_NewMineRect.GetComponent<Button>().interactable = true;
-            }
-            E();
-        }
+        RefreshUI();
     }
 
     public void AddCash( double amount )
     {
         m_PlayerCash += amount;
-        E();
+        RefreshUI();
     }
 
     public void RetrieveCash( double amount )
     {
         m_PlayerCash -= amount;
-        E();
+        RefreshUI();
     }
 
     public void CreateMineShaft()
@@ -64,7 +49,7 @@ public class GameManager : MonoBehaviour
             m_MineShaftManager.AddMineShaft( mineShaft );
 
             Button infoButton = mineShaft.m_InfoButton;
-            infoButton.onClick.AddListener( delegate { m_BuildingInfoManager.DisplayInfo( mineShaft ); } );
+            infoButton.onClick.AddListener( delegate { m_BuildingInfoController.DisplayInfo( mineShaft ); } );
             Text lvlText = infoButton.transform.GetComponentInChildren<Text>();
             lvlText.text = "Level\n" + 1;
 
@@ -78,37 +63,17 @@ public class GameManager : MonoBehaviour
                 Destroy( m_NewMineRect.gameObject );
                 m_NewMineRect = null;
             }
-            E();
+            RefreshUI();
         }
-        //else
-        //{
-        //    //double newBuyCost = m_MineShaftManager.GetCurrentBuyCost();
-        //    //m_MineShaftCostText.text = "New Shaft\n" + CashFormatter.FormatToString( newBuyCost );
-        //    //if ( m_PlayerCash < newBuyCost && m_NewMineRect != null )
-        //    //{
-        //    //    m_NewMineRect.GetComponent<Button>().interactable = false;
-        //    //}
-        //}
     }
 
-    //public void RefreshUI()
-    //{
-    //    double newBuyCost = m_MineShaftManager.GetCurrentBuyCost();
-    //    m_MineShaftCostText.text = "New Shaft\n" + CashFormatter.FormatToString( newBuyCost );
-    //    if ( m_PlayerCash < newBuyCost && m_NewMineRect != null )
-    //    {
-    //        m_NewMineRect.GetComponent<Button>().interactable = false;
-    //    }
-    //    m_CashText.text = CashFormatter.FormatToString( m_PlayerCash );
-    //}
-
-    public void E()
+    public void RefreshUI()
     {
-        m_CashText.text = CashFormatter.FormatToString( m_PlayerCash );
+        m_CashText.text = CashUtility.FormatToString( m_PlayerCash );
         double newBuyCost = m_MineShaftManager.GetNewBuyCost();
-        m_MineShaftCostText.text = "New Shaft\n" + CashFormatter.FormatToString( newBuyCost );
-         m_NewMineRect.GetComponent<Button>().interactable = ( m_PlayerCash >= newBuyCost && m_NewMineRect != null );
-        m_BuildingInfoManager.RefreshInfo();
+        m_MineShaftCostText.text = "New Shaft\n" + CashUtility.FormatToString( newBuyCost );
+        m_NewMineRect.GetComponent<Button>().interactable = ( m_PlayerCash >= newBuyCost && m_NewMineRect != null );
+        m_BuildingInfoController.RefreshInfo();
     }
 
     public double PlayerCash { get { return m_PlayerCash; } }
